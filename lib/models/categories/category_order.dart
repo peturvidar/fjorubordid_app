@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-
-
+//Button for order category
 class CategoryOrder extends StatelessWidget {
-  const CategoryOrder({ Key? key, required this.data, this.selected = false}) : super(key: key);
+  const CategoryOrder({Key? key, required this.data, this.selected = false})
+      : super(key: key);
   final data;
   final bool selected;
 
-
   @override
   Widget build(BuildContext context) {
-
-    return GestureDetector(
-      onTap: (){
-        Navigator.of(context).pushNamed("screens/orderscreen");
+    return GestureDetector(//On tap sends user to order screen
+      onTap: () {
+        Navigator.of(context).pushNamed("screens/orderScreen");
       },
       child: Container(
         padding: const EdgeInsets.all(10),
@@ -23,22 +21,22 @@ class CategoryOrder extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? primary : cardColor,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor.withOpacity(0.05),
-              spreadRadius: .5,
-              blurRadius: .5,
-              offset: const Offset(0, 1), // changes position of shadow
-            ),
-          ],
+
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(data["icon"], size: 17, color: selected ? Colors.white : darker),
-            const SizedBox(width: 7,),
-            Text(data["name"], maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 13, color: selected ? Colors.white : darker),
+            Icon(data["icon"],
+                size: 17, color: selected ? Colors.white : darkGrey),
+            const SizedBox(
+              width: 7,
+            ),
+            Text(
+              data["name"],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 13, color: selected ? Colors.white : darkGrey),
             )
           ],
         ),

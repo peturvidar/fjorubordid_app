@@ -8,20 +8,16 @@ class CheckOutButton extends StatelessWidget {
       this.title = "",
       this.width = double.infinity,
       this.height = 45,
-      this.bgColor = primary,
       this.icon,
       this.disableButton = false,
       this.isLoading = false,
-      this.radius = 10,
-      this.textColor = Colors.black})
+      this.radius = 10})
       : super(key: key);
   final GestureTapCallback onTap;
   final String title;
-  final Color textColor;
   final double width;
   final double height;
   final double radius;
-  final Color bgColor;
   final IconData? icon;
   final bool disableButton;
   final bool isLoading;
@@ -35,15 +31,7 @@ class CheckOutButton extends StatelessWidget {
         child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),
-              color: disableButton ? bgColor.withOpacity(0.3) : bgColor,
-              boxShadow: [
-                BoxShadow(
-                  color: shadowColor.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 1,
-                  offset: const Offset(0, 1), // changes position of shadow
-                ),
-              ],
+              color: disableButton ? primary.withOpacity(0.3) : primary,
             ),
             width: width,
             height: height,
@@ -52,11 +40,11 @@ class CheckOutButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: isLoading
                     ? [
-                        SizedBox(
+                        const SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: textColor,
+                              color: black,
                               strokeWidth: 3,
                             ))
                       ]
@@ -66,8 +54,8 @@ class CheckOutButton extends StatelessWidget {
                               title,
                               style: TextStyle(
                                   color: disableButton
-                                      ? textColor.withOpacity(0.3)
-                                      : textColor,
+                                      ? black.withOpacity(0.3)
+                                      : black,
                                   fontWeight: FontWeight.w600),
                             )
                           ]
@@ -76,8 +64,8 @@ class CheckOutButton extends StatelessWidget {
                               icon,
                               size: 23,
                               color: disableButton
-                                  ? textColor.withOpacity(0.3)
-                                  : textColor,
+                                  ? black.withOpacity(0.3)
+                                  : black,
                             ),
                             const SizedBox(
                               width: 5,
@@ -86,8 +74,8 @@ class CheckOutButton extends StatelessWidget {
                               title,
                               style: TextStyle(
                                   color: disableButton
-                                      ? textColor.withOpacity(0.3)
-                                      : textColor,
+                                      ? black.withOpacity(0.3)
+                                      : black,
                                   fontWeight: FontWeight.w600),
                             )
                           ])),

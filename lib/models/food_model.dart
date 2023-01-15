@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+//Food model for converting Json response from API
 List<FoodModel> foodModelFromJson(String str) =>
     List<FoodModel>.from(json.decode(str).map((x) => FoodModel.fromJson(x)));
 
@@ -12,6 +13,7 @@ class FoodModel {
   String description;
   int quantity;
   int unitPrice;
+  String imagePath;
 
   FoodModel({
     required this.foodId,
@@ -19,6 +21,7 @@ class FoodModel {
     required this.description,
     required this.quantity,
     required this.unitPrice,
+    required this.imagePath,
   });
 
   factory FoodModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +31,7 @@ class FoodModel {
       description: json['description'],
       quantity: json['quantity'],
       unitPrice: json['unitPrice'],
+        imagePath: json['imagePath'],
     );
   }
   Map<String, dynamic> toJson() => {
@@ -36,5 +40,6 @@ class FoodModel {
         "description": description,
         "quantity": quantity,
         "unitPrice": unitPrice,
+          "imagePath": imagePath,
       };
 }

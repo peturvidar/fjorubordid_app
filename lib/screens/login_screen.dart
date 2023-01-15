@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/colors.dart';
 import '../utils/api_constants.dart';
+import '../utils/services.dart';
 import 'food_screen.dart';
 import 'sign_up_screen.dart';
 
@@ -22,8 +22,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   late String email, password;
   final _key = GlobalKey<FormState>();
-
   bool _secureText = true;
+  final _services = Services();
+
+  Future<SharedPreferences> _getPreferences() async {
+    return await SharedPreferences.getInstance();
+  }
 
   showHide() {
     setState(() {
@@ -35,12 +39,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final form = _key.currentState;
     if (form!.validate()) {
       form.save();
-      login();
+      _login();
     }
   }
 
-  login() async {
-    //SharedPreferences preferences = await SharedPreferences.getInstance();
+  void _login() async {
+    final preferences = await _getPreferences();
     final response = await http.post(
         Uri.parse(ApiConstants.baseUrl + ApiConstants.loginEndPoint),
         headers: <String, String>{
@@ -50,7 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
           "email": email,
           "password": password,
         }));
-
+    if (response.statusCode == 400) {
+      _services.loginToast("Lykilorð eða netfang vitlaust skráð");
+    }
     final data = jsonDecode(response.body);
     String authToken = data['token'];
 
@@ -60,56 +66,37 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           MaterialPageRoute(builder: (context) => const FoodScreen()),
         );
-        savePref(authToken);
+        _savePref(authToken);
       });
-      loginToast("Innskráning tókst");
-    } else if (response.statusCode == 400) {
-      loginToast("Lykilorð eða netfang vitlaust skráð");
+      _services.loginToast("Innskráning tókst");
     } else {
-      loginToast("Innskráning gekk ekki");
+      _services.loginToast("Innskráning gekk ekki");
     }
   }
 
-  loginToast(String toast) {
-    return Fluttertoast.showToast(
-        msg: toast,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 3,
-        backgroundColor:
-            toast == "Innskráning tókst" ? Colors.green : Colors.red,
-        textColor: Colors.white);
-  }
-
-  savePref(String authToken) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
+  void _savePref(String authToken) async {
+    final preferences = await _getPreferences();
     setState(() {
-      preferences.setString("auth_token", authToken);
-      //preferences.commit();
+      preferences.setString("authToken", authToken);
     });
   }
 
-  var value;
-
-  getPref() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    setState(() {
-      value = preferences.getInt("value");
-
-      _loginStatus = value == 1 ? LoginStatus.signIn : LoginStatus.notSignIn;
-    });
+  void _getPref() async {
+    final preferences = await _getPreferences();
+    int? value = preferences.getInt("value");
+    _loginStatus = value == 1 ? LoginStatus.signIn : LoginStatus.notSignIn;
   }
 
   @override
   void initState() {
     super.initState();
-    getPref();
+    _getPref();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: black,
       body: Center(
         child: ListView(
           shrinkWrap: true,
@@ -118,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Center(
               child: Container(
                 padding: const EdgeInsets.all(8.0),
-                color: Colors.black,
+                color: black,
                 child: Form(
                   key: _key,
                   child: Column(
@@ -131,39 +118,39 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 50,
                         child: Text(
                           "Innskráning",
-                          style: TextStyle(color: Colors.white, fontSize: 30.0),
+                          style: TextStyle(color: cardColor, fontSize: 30.0),
                         ),
                       ),
                       const SizedBox(
                         height: 25,
                       ),
-
-                      //card for Email TextFormField
                       Card(
                         elevation: 6.0,
                         child: TextFormField(
                           validator: (e) {
                             if (e!.isEmpty) {
                               return "Netfang getur ekki verið tómt";
+                            } else if (Services.isEmailValid(e) == false) {
+                              return "Verður að vera gilt netfang";
+                            } else {
+                              return null;
                             }
                           },
                           onSaved: (e) => email = e!,
                           style: const TextStyle(
-                            color: Colors.black,
+                            color: black,
                             fontSize: 16,
                             fontWeight: FontWeight.w300,
                           ),
                           decoration: const InputDecoration(
                               prefixIcon: Padding(
                                 padding: EdgeInsets.only(left: 20, right: 15),
-                                child: Icon(Icons.person, color: Colors.black),
+                                child: Icon(Icons.person, color: black),
                               ),
                               contentPadding: EdgeInsets.all(18),
                               labelText: "Netfang"),
                         ),
                       ),
-
-                      // Card for password TextFormField
                       Card(
                         elevation: 6.0,
                         child: TextFormField(
@@ -171,11 +158,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (e!.isEmpty) {
                               return "Lykilorð getur ekki verið tómt";
                             }
+                            return null;
                           },
                           obscureText: _secureText,
                           onSaved: (e) => password = e!,
                           style: const TextStyle(
-                            color: Colors.black,
+                            color: black,
                             fontSize: 16,
                             fontWeight: FontWeight.w300,
                           ),
@@ -183,8 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             labelText: "Lykilorð",
                             prefixIcon: const Padding(
                               padding: EdgeInsets.only(left: 20, right: 15),
-                              child: Icon(Icons.phonelink_lock,
-                                  color: Colors.black),
+                              child: Icon(Icons.phonelink_lock, color: black),
                             ),
                             suffixIcon: IconButton(
                               onPressed: showHide,
@@ -196,24 +183,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(
                         height: 12,
                       ),
-
                       const ElevatedButton(
                         onPressed: null,
                         child: Text(
                           "Gleymt lykilorð?",
                           style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                              color: cardColor, fontWeight: FontWeight.bold),
                         ),
                       ),
-
                       const Padding(
                         padding: EdgeInsets.all(14.0),
                       ),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
@@ -226,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   check();
                                 },
                                 child: const Text(
-                                    style: TextStyle(color: Colors.black),
+                                    style: TextStyle(color: black),
                                     "Innskráning")),
                           ),
                           SizedBox(
@@ -243,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                 },
                                 child: const Text(
-                                    style: TextStyle(color: Colors.black),
+                                    style: TextStyle(color: black),
                                     "Nýskráning")),
                           ),
                         ],

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+//Order model for converting Json response from API
 List<OrderModel> orderModelFromJson(String str) =>
     List<OrderModel>.from(json.decode(str).map((x) => OrderModel.fromJson(x)));
 

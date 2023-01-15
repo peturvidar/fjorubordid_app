@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-
 import '../theme/colors.dart';
 import '../utils/api_constants.dart';
+import '../utils/services.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -15,9 +14,9 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  late String firstName, email, lastName, password;
-  final _key =  GlobalKey<FormState>();
-
+  late String userName, email, password;
+  final _key = GlobalKey<FormState>();
+  final _services = Services();
   bool _secureText = true;
 
   showHide() {
@@ -35,53 +34,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   save() async {
-
-    final response = await http.post(Uri.parse(ApiConstants.baseUrl + ApiConstants.signUpEndPoint),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        //"userName": userName,
-    "firstName": firstName,
-    "lastName": lastName,
-    "email": email,
-    "password": password,
-      }));
-   /* //final data = jsonDecode(response.body);
-    //String id = data['id'];*/
+    final response = await http.post(
+        Uri.parse(ApiConstants.baseUrl + ApiConstants.signUpEndPoint),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          "userName": userName,
+          "email": email,
+          "password": password,
+        }));
 
     if (response.statusCode == 200) {
       setState(() {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       });
-      //print(id);
-      registerToast("Nýskráning tókst");
-    } else if (response.statusCode == 400){
-      registerToast("Notandi með þetta netfang er þegar til");
-    }
-    else {
-      registerToast("Nýskráning mistókst");
-    }
-  }
 
-  registerToast(String toast) {
-    return Fluttertoast.showToast(
-        msg: toast,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 2,
-        backgroundColor: toast == "Nýskráning tókst" ? Colors.green : Colors.red,
-        textColor: Colors.white);
+      _services.registerToast("Nýskráning tókst");
+    } else if (response.statusCode == 400) {
+      _services.registerToast("Notandi er þegar til");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: black,
       body: Center(
         child: ListView(
           shrinkWrap: true,
@@ -90,13 +71,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Center(
               child: Container(
                 padding: const EdgeInsets.all(8.0),
-                color: Colors.black,
+                color: black,
                 child: Form(
                   key: _key,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-
                       const SizedBox(
                         height: 40,
                       ),
@@ -104,78 +84,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         height: 50,
                         child: Text(
                           "Nýskráning",
-                          style: TextStyle(color: Colors.white, fontSize: 30.0),
+                          style: TextStyle(color: cardColor, fontSize: 30.0),
                         ),
                       ),
                       const SizedBox(
                         height: 25,
                       ),
-
                       Card(
                         elevation: 6.0,
                         child: TextFormField(
                           validator: (e) {
                             if (e!.isEmpty) {
-                              return "Vantar nafn";
+                              return "Vantar notandanafn";
                             }
+                            return null;
                           },
-                          onSaved: (e) => firstName = e!,
+                          onSaved: (e) => userName = e!,
                           style: const TextStyle(
-                            color: Colors.black,
+                            color: black,
                             fontSize: 16,
                             fontWeight: FontWeight.w300,
                           ),
                           decoration: const InputDecoration(
                               prefixIcon: Padding(
                                 padding: EdgeInsets.only(left: 20, right: 15),
-                                child: Icon(Icons.person, color: Colors.black),
+                                child: Icon(Icons.person, color: black),
                               ),
                               contentPadding: EdgeInsets.all(18),
-                              labelText: "Nafn"),
+                              labelText: "Notandanafn"),
                         ),
                       ),
-                      Card(
-                        elevation: 6.0,
-                        child: TextFormField(
-                          validator: (e) {
-                            if (e!.isEmpty) {
-                              return "Vantar eftirnafn";
-                            }
-                          },
-                          onSaved: (e) => lastName = e!,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w300,
-                          ),
-                          decoration: const InputDecoration(
-                              prefixIcon: Padding(
-                                padding: EdgeInsets.only(left: 20, right: 15),
-                                child: Icon(Icons.person, color: Colors.black),
-                              ),
-                              contentPadding: EdgeInsets.all(18),
-                              labelText: "Eftirnafn"),
-                        ),
-                      ),
-
                       Card(
                         elevation: 6.0,
                         child: TextFormField(
                           validator: (e) {
                             if (e!.isEmpty) {
                               return "Vinsamlega sláið inn netfang";
+                            } else if (Services.isEmailValid(e) == false) {
+                              return "Verður að vera gilt netfang";
                             }
+                            return null;
                           },
                           onSaved: (e) => email = e!,
                           style: const TextStyle(
-                            color: Colors.black,
+                            color: black,
                             fontSize: 16,
                             fontWeight: FontWeight.w300,
                           ),
                           decoration: const InputDecoration(
                               prefixIcon: Padding(
                                 padding: EdgeInsets.only(left: 20, right: 15),
-                                child: Icon(Icons.email, color: Colors.black),
+                                child: Icon(Icons.email, color: black),
                               ),
                               contentPadding: EdgeInsets.all(18),
                               labelText: "Netfang"),
@@ -185,9 +144,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         elevation: 6.0,
                         child: TextFormField(
                           obscureText: _secureText,
+                          validator: (e) {
+                            if (e!.isEmpty) {
+                              return "Vinsamlega sláið inn netfang";
+                            } else if (Services.isPasswordValid(e) == false) {
+                              return "Lykilorð verður að vera minnst 6 stafir, 1 stóran staf og 1 tölu";
+                            }
+                            return null;
+                          },
                           onSaved: (e) => password = e!,
                           style: const TextStyle(
-                            color: Colors.black,
+                            color: black,
                             fontSize: 16,
                             fontWeight: FontWeight.w300,
                           ),
@@ -200,55 +167,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                               prefixIcon: const Padding(
                                 padding: EdgeInsets.only(left: 20, right: 15),
-                                child: Icon(Icons.phonelink_lock,
-                                    color: Colors.black),
+                                child: Icon(Icons.phonelink_lock, color: black),
                               ),
                               contentPadding: const EdgeInsets.all(18),
                               labelText: "Lykilorð"),
                         ),
                       ),
-
                       const Padding(
                         padding: EdgeInsets.all(12.0),
                       ),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           SizedBox(
                             height: 44.0,
                             child: ElevatedButton(
-                                style:
-                                ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                    primary),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: primary),
                                 onPressed: () {
                                   check();
                                 },
                                 child: const Text(
-                                    style: TextStyle(
-                                        color: Colors.black),
-                                    "Nýskrá")),
+                                    style: TextStyle(color: black), "Nýskrá")),
                           ),
                           SizedBox(
                             height: 44.0,
                             child: ElevatedButton(
-                                style:
-                                ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                    primary),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: primary),
                                 onPressed: () {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const LoginScreen()),
+                                        builder: (context) =>
+                                            const LoginScreen()),
                                   );
                                 },
                                 child: const Text(
-                                    style: TextStyle(
-                                        color: Colors.black),
+                                    style: TextStyle(color: black),
                                     "Innskráning")),
-
                           ),
                         ],
                       ),
