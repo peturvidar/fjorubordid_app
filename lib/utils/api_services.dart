@@ -71,7 +71,7 @@ class ApiService {
     }
 
   }
-
+  //Post request that adds a new food item of same type as selected food item to order items
   Future<OrderModel> increaseQuantityOrderItemFood(
       OrderModel orderModel) async {
     final prefs = await SharedPreferences.getInstance();
@@ -98,7 +98,7 @@ class ApiService {
       throw Exception('Failed to create order.');
     }
   }
-
+  //Delete request that deletes an item of same type as selected item in order items
   Future<OrderModel> decreaseQuantityOrderItem(OrderModel orderModel) async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -124,7 +124,7 @@ class ApiService {
       throw Exception('Failed to create order.');
     }
   }
-
+//Post request that adds a new drink item of same type as selected drink item to order items
   Future<OrderModel> increaseQuantityOrderItemDrink(
       OrderModel orderModel) async {
     final prefs = await SharedPreferences.getInstance();
@@ -151,7 +151,7 @@ class ApiService {
       throw Exception('Failed to create order.');
     }
   }
-
+  //Post request that adds selected food item to user order items
   Future<FoodModel> addFoodItemToOrder(FoodModel foodModel) async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -175,7 +175,7 @@ class ApiService {
       throw Exception('Failed to create order.');
     }
   }
-
+  //Post request that adds selected drink item to user order items
   Future<DrinkModel> addDrinkItemToOrder(DrinkModel drinkModel) async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -200,7 +200,7 @@ class ApiService {
       throw Exception('Failed to create order.');
     }
   }
-
+  //Request that gets total sum of user order items.
   Future getTotalPrice() async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -246,7 +246,7 @@ class ApiService {
       throw "failed to delete item";
     }
   }
-
+  //Deleted all order items
   Future deleteAllOrderItems() async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');

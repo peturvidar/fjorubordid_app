@@ -4,6 +4,7 @@ import '../models/categories/category_food.dart';
 import '../models/categories/category_order.dart';
 import '../models/category_model.dart';
 
+//Widget that displays list of categories in the app each has an on tap redirect to name screen route
 class CategoryWidget{
 
   listCategories() {

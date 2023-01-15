@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../screens/order_screen.dart';
 import '../theme/colors.dart';
 
+
+//Buttons for pop up when adding item to order with option to keep shopping or going straight to order screen
 class AddOrderButtons extends StatelessWidget {
   const AddOrderButtons({Key? key}) : super(key: key);
 

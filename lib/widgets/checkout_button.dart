@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
-
+//Button with a trial use only for testing the app which deleted all user order items from database.
 class CheckOutButton extends StatelessWidget {
   const CheckOutButton(
       {Key? key,

@@ -8,6 +8,8 @@ import '../utils/services.dart';
 import 'food_screen.dart';
 import 'sign_up_screen.dart';
 
+//Login screen gives user option to choose register page if user doesnt have account already.
+//Uses sharedpreference to store token in cache for automatic login when exiting and re-entering app.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -42,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _login();
     }
   }
-
+  //Post request to API to login user and receive token, stores token in shared preference
   void _login() async {
     final preferences = await _getPreferences();
     final response = await http.post(
@@ -73,14 +75,14 @@ class _LoginScreenState extends State<LoginScreen> {
       _services.loginToast("Innskráning gekk ekki");
     }
   }
-
+  //Stores token
   void _savePref(String authToken) async {
     final preferences = await _getPreferences();
     setState(() {
       preferences.setString("authToken", authToken);
     });
   }
-
+  //Gets token
   void _getPref() async {
     final preferences = await _getPreferences();
     int? value = preferences.getInt("value");

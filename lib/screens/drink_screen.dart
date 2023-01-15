@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fjorubordid_app_final_version/widgets/add_order_buttons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/drink_model.dart';
 import '../theme/colors.dart';
 import '../utils/api_constants.dart';
@@ -8,6 +9,9 @@ import '../utils/api_services.dart';
 import '../widgets/appbar_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/header_image.dart';
+
+//Screen that gets and displays drink items in scrollable container from API,
+// with option to add item to order
 
 class DrinkScreen extends StatefulWidget {
   const DrinkScreen({Key? key}) : super(key: key);
@@ -18,8 +22,8 @@ class DrinkScreen extends StatefulWidget {
 
 class _DrinkScreenState extends State<DrinkScreen> {
   final _apiService = ApiService();
-  List<DrinkModel> _drinkModel = []; //list of drink items
-
+  List<DrinkModel> _drinkModel = []; //Empty list of drink items
+  final addThousandSeparator = NumberFormat.decimalPattern();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +46,7 @@ class _DrinkScreenState extends State<DrinkScreen> {
               height: 25,
             ),
             Container(
-              //Displays list of categories
+              //Displays list of categories with on tap redirection to named screen
               child:CategoryWidget().listCategories(),
             ),
             const SizedBox(
@@ -61,7 +65,7 @@ class _DrinkScreenState extends State<DrinkScreen> {
             const SizedBox(
               height: 10,
             ),
-            //Get drink items from api and displays them
+            //Get a list of drink items from api and display them with Builder
             FutureBuilder<List<DrinkModel>>(
               future: _apiService.getDrinkItems(),
               builder: (context, snapshot) {
@@ -81,7 +85,7 @@ class _DrinkScreenState extends State<DrinkScreen> {
       ),
     );
   }
-
+  //Widget to build the card for displaying the drink objects.
   Widget _buildDrinksList() {
     return Expanded(
       child: ListView.builder(
@@ -104,7 +108,7 @@ class _DrinkScreenState extends State<DrinkScreen> {
                         margin: const EdgeInsets.only(top: 10, bottom: 10),
                         width: 100,
                         height: 70,
-                        child: CachedNetworkImage(
+                        child: CachedNetworkImage(//Displays image from http request and stores in cache for faster reload
                           imageUrl:
                               '${ApiConstants.baseUrl + ApiConstants.imageEndpoint}${_drinkModel[index].imagePath}',
                         ),
@@ -117,7 +121,7 @@ class _DrinkScreenState extends State<DrinkScreen> {
                             const SizedBox(
                               height: 5.0,
                             ),
-                            Text(
+                            Text(//Name of drink object
                               '${_drinkModel[index].name.toString()}\n',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -126,14 +130,14 @@ class _DrinkScreenState extends State<DrinkScreen> {
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w600),
                             ),
-                            Text(
+                            Text(//Drink object description
                               '${_drinkModel[index].description.toString()}\n',
                               maxLines: 1,
                               style:
                                   const TextStyle(color: grey, fontSize: 14.0),
                             ),
-                            Text(
-                              '${_drinkModel[index].unitPrice}.-kr',
+                            Text(//Drink object price
+                              '${addThousandSeparator.format(_drinkModel[index].unitPrice)}.-kr',
                               maxLines: 1,
                               style: const TextStyle(
                                   color: blueGrey, fontSize: 16.0),
@@ -141,7 +145,8 @@ class _DrinkScreenState extends State<DrinkScreen> {
                           ],
                         ),
                       ),
-                      //Add to order button, gives option to keep shopping or go to order
+                          //Add to order button. Creates a new instance of selected drink object in order items table,
+                          // after press a pop up appears to  give option to keep shopping or go to order
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20.0),
                         child: Container(
@@ -155,7 +160,7 @@ class _DrinkScreenState extends State<DrinkScreen> {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return const AddOrderButtons();
-                                  });
+                                  });//Http post request to create new instance of drink item in order items
                               _apiService
                                   .addDrinkItemToOrder(_drinkModel[index]);
                             },

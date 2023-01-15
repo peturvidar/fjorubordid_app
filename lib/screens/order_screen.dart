@@ -1,5 +1,6 @@
 import 'package:fjorubordid_app_final_version/widgets/set_quantity_buttons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/order_model.dart';
 import '../theme/colors.dart';
 import '../utils/api_services.dart';
@@ -8,6 +9,10 @@ import '../widgets/category_widget.dart';
 import '../widgets/checkout_button.dart';
 import '../widgets/header_image.dart';
 
+//Screen that gets and displays items user has added to his order, gets them by user id.
+//Displayed in a scrollable container with option increase/decrease quantity of item or delete
+//item from order. Contains widget to calculate sum og total price of order and displays it.
+//Has checkout button with a trial use only for testing the app which deleted all user order items from database.
 class OrderScreen extends StatefulWidget {
   const OrderScreen({Key? key}) : super(key: key);
 
@@ -17,9 +22,9 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen> {
   final _apiService = ApiService();
-  late List? totalPrice = [];
-  List<OrderModel> _orderModel = [];
-
+  late List? totalPrice = [];  //Empty list of total price of products
+  List<OrderModel> _orderModel = []; //Empty list of order items
+  final addThousandSeparator = NumberFormat.decimalPattern();
   @override
   void initState() {
     super.initState();
@@ -27,7 +32,8 @@ class _OrderScreenState extends State<OrderScreen> {
     _getTotalPrice();
   }
 
-  //Get data from API
+  //Http get request to get order items data from API uses stackElements function
+  // to stack together items with either the same food id or drink id
   void _getData() async {
     _orderModel = (await _apiService.getUserOrderItems());
     setState(() {});
@@ -83,7 +89,7 @@ class _OrderScreenState extends State<OrderScreen> {
               height: 25,
             ),
             Container(
-              //Displays list of categories
+              //Displays list of categories with on tap redirection to named screen
               child: CategoryWidget().listCategories(),
             ),
             const SizedBox(
@@ -131,7 +137,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                     const SizedBox(
                                       height: 5.0,
                                     ),
-                                    Text(
+                                    Text(//OrderItem name
                                       '${_orderModel[index].name.toString()}\n',
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
@@ -140,14 +146,14 @@ class _OrderScreenState extends State<OrderScreen> {
                                           fontSize: 16.0,
                                           fontWeight: FontWeight.w600),
                                     ),
-                                    Text(
+                                    Text(//OrderItem description
                                       '${_orderModel[index].description.toString()}\n',
                                       maxLines: 1,
                                       style: const TextStyle(
                                           color: grey, fontSize: 14.0),
                                     ),
-                                    Text(
-                                      '${_orderModel[index].unitPrice}.-kr',
+                                    Text(//OrderItem unit price
+                                      '${addThousandSeparator.format(_orderModel[index].unitPrice)}.-kr',
                                       maxLines: 1,
                                       style: const TextStyle(
                                           color: blueGrey, fontSize: 16.0),
@@ -161,7 +167,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     //Button to decrease quantity of order item,
-                                    // deletes instance of object in order items and refreshed state of order items
+                                    // deletes instance of order item and refreshed state of order items
                                     DecreaseQuantityButton(decreaseOnTap: () {
                                       if (_orderModel[index].orderItemId > 0) {
                                         _apiService
@@ -178,7 +184,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                     const SizedBox(
                                       width: 5.0,
                                     ),
-                                    Text(
+                                    Text(//Order item quantity
                                       "${_orderModel[index].quantity}",
                                       style: const TextStyle(
                                           color: black, fontSize: 24.0),
@@ -187,10 +193,10 @@ class _OrderScreenState extends State<OrderScreen> {
                                       width: 5.0,
                                     ),
                                     //Button to increase quantity of order item,
-                                    // creates a new object of selected object in order items and refreshed
+                                    // creates a new object of selected object in order items and refreshes
                                     // state of order items
                                     IncreaseQuantityButton(increaseOnTap: () {
-                                      if (_orderModel[index].foodId > 0) {
+                                      if (_orderModel[index].foodId > 0) {//Use if order item is food object
                                         _apiService
                                             .increaseQuantityOrderItemFood(
                                                 _orderModel[index])
@@ -200,7 +206,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                             _getTotalPrice();
                                           });
                                         });
-                                      } else {
+                                      } else {//Use if order item is drink object
                                         _apiService
                                             .increaseQuantityOrderItemDrink(
                                                 _orderModel[index])
@@ -225,7 +231,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                         const Icon(Icons.delete, color: black),
                                     style: const ButtonStyle(),
                                     onPressed: () {
-                                      if (_orderModel[index].foodId > 0) {
+                                      if (_orderModel[index].foodId > 0) { //Delete if item is food item
                                         _apiService
                                             .deleteOrderItem(
                                                 _orderModel[index].foodId)
@@ -235,7 +241,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                             _orderModel.removeAt(index);
                                           });
                                         });
-                                      } else {
+                                      } else {  //Delete if item is drink item
                                         _apiService
                                             .deleteOrderItem(
                                                 _orderModel[index].drinkId)
@@ -255,7 +261,7 @@ class _OrderScreenState extends State<OrderScreen> {
                         );
                       }),
             ),
-            //Total sum of order items, calls getTotalSum function to calculate sum
+            //Total sum of order items, calls getTotalSum function to calculate sum of all user order items
             Container(  //Total amount of order items
               padding: const EdgeInsets.only(left: 30, right: 30),
               child: Column(children: [
@@ -273,7 +279,7 @@ class _OrderScreenState extends State<OrderScreen> {
                           color: cardColor),
                     ),
                     Text(
-                      "${getTotalSum()}\.-kr",
+                      '${addThousandSeparator.format(getTotalSum())}.-kr',
                       style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 20,
@@ -285,7 +291,7 @@ class _OrderScreenState extends State<OrderScreen> {
                   height: 30,
                 ),
                 //Checkout button to finalize order, has no other function at the moment other then
-                //deleting all order items and leaves a message
+                //deleting all order items and leaves a thanks message
                 CheckOutButton(
                   onTap: () {
                     showDialog(
@@ -293,7 +299,7 @@ class _OrderScreenState extends State<OrderScreen> {
                         builder: (BuildContext context) {
                           return const AlertDialog(
                             title: Text(
-                                "Pöntunin þín hefur verið afgreitt, takk fyrir nota þessa prufu útgáfu af Fjöruborðs appinu"),
+                                "Pöntunin þín hefur verið afgreitt, takk fyrir nota þessa prufu útgáfu af Fjöruborðsappinu"),
                             titleTextStyle: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: black,
@@ -317,7 +323,7 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 
-  //Get total sum of order items
+  //Get total sum of user order items
   getTotalSum() {
     if (totalPrice!.isNotEmpty) {
       var sum = totalPrice!.reduce((a, b) => a + b);

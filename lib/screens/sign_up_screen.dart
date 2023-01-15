@@ -6,6 +6,8 @@ import '../utils/api_constants.dart';
 import '../utils/services.dart';
 import 'login_screen.dart';
 
+
+//Signup screen gives user option to register as new user or redirect to login screen if user already has an account
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 

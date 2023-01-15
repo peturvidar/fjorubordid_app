@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'custom_button.dart';
-
+//Buttons used in order screen to give option to increase/decrease quantity of selected item in order.
 class DecreaseQuantityButton extends StatelessWidget {
   const DecreaseQuantityButton(
       {Key? key,

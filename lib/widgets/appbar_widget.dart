@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../screens/login_screen.dart';
 import '../theme/colors.dart';
 
-
+//Appbar widget shared for all screens, contains title of app and button that redirects to login screen
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final double? height;
   const AppBarWidget({

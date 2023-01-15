@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fjorubordid_app_final_version/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/food_model.dart';
 import '../utils/api_constants.dart';
 import '../utils/api_services.dart';
@@ -9,6 +10,9 @@ import '../widgets/appbar_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/header_image.dart';
 
+
+//Screen that gets and displays food items in scrollable container from API,
+// with option to add item to order
 class FoodScreen extends StatefulWidget {
   const FoodScreen({Key? key}) : super(key: key);
 
@@ -18,9 +22,8 @@ class FoodScreen extends StatefulWidget {
 
 class _FoodScreenState extends State<FoodScreen> {
   final _apiService = ApiService();
-  //List of food items
-  List<FoodModel> _foodModel = [];
-
+  List<FoodModel> _foodModel = [];//Empty list of food items
+  final addThousandSeparator = NumberFormat.decimalPattern();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +46,7 @@ class _FoodScreenState extends State<FoodScreen> {
               height: 25,
             ),
             Container(
-              //Displays list of categories
+              //Displays list of categories with on tap redirection to named screen
               child: CategoryWidget().listCategories(),
             ),
             const SizedBox(
@@ -62,9 +65,9 @@ class _FoodScreenState extends State<FoodScreen> {
             const SizedBox(
               height: 10,
             ),
-            //Get a list of food items from api and display them
+            //Get a list of food items from api and display them with Builder
             FutureBuilder<List<FoodModel>>(
-              future: _apiService.getFoodItems(),
+              future: _apiService.getFoodItems(),//api get request
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.hasData) {
@@ -83,6 +86,7 @@ class _FoodScreenState extends State<FoodScreen> {
     );
   }
 
+  //Widget to build the card for displaying the food objects.
   Widget _buildFoodList() {
     return Expanded(
       child: ListView.builder(
@@ -105,7 +109,7 @@ class _FoodScreenState extends State<FoodScreen> {
                         margin: const EdgeInsets.only(top: 10, bottom: 10),
                         width: 100,
                         height: 70,
-                        child: CachedNetworkImage(
+                        child: CachedNetworkImage( //Displays image from http request and stores in cache for faster reload
                           imageUrl:
                               '${ApiConstants.baseUrl + ApiConstants.imageEndpoint}${_foodModel[index].imagePath}',
                         ),
@@ -118,7 +122,7 @@ class _FoodScreenState extends State<FoodScreen> {
                             const SizedBox(
                               height: 5.0,
                             ),
-                            Text(
+                            Text(//Name of food object
                               '${_foodModel[index].name.toString()}\n',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -127,14 +131,14 @@ class _FoodScreenState extends State<FoodScreen> {
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w600),
                             ),
-                            Text(
+                            Text(//Food object description
                               '${_foodModel[index].description.toString()}\n',
                               maxLines: 1,
                               style:
                                   const TextStyle(color: grey, fontSize: 14.0),
                             ),
-                            Text(
-                              '${_foodModel[index].unitPrice}.-kr',
+                            Text(//Drink object price
+                              '${addThousandSeparator.format(_foodModel[index].unitPrice)}.-kr',
                               maxLines: 1,
                               style: const TextStyle(
                                   color: blueGrey, fontSize: 16.0),
@@ -142,7 +146,8 @@ class _FoodScreenState extends State<FoodScreen> {
                           ],
                         ),
                       ),
-                      //Add to order button, gives option to keep shopping or go to order
+                      //Add to order button. Creates a new instance of selected food object in order items table,
+                      // after press a pop up appears to  give option to keep shopping or go to order
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20.0),
                         child: Container(
@@ -156,7 +161,7 @@ class _FoodScreenState extends State<FoodScreen> {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return const AddOrderButtons();
-                                  });
+                                  }); //Http post request to create new instance of food item in order items
                               _apiService.addFoodItemToOrder(_foodModel[index]);
                             },
                           ),
